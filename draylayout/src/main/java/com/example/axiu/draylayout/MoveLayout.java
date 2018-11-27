@@ -3,7 +3,6 @@ package com.example.axiu.draylayout;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -26,7 +25,6 @@ public class MoveLayout extends RelativeLayout {
     private static final int CENTER = 0x19;
 
 
-
     private int lastX;
     private int lastY;
 
@@ -45,12 +43,12 @@ public class MoveLayout extends RelativeLayout {
 
 
     /**
-     *触控区域设定
+     * 触控区域设定
      */
     private int touchAreaLength = 60;
 
     private int minHeight = 120;
-    private int minWidth= 180;
+    private int minWidth = 180;
     private static final String TAG = "MoveLinearLayout";
 
 
@@ -75,22 +73,22 @@ public class MoveLayout extends RelativeLayout {
         screenWidth = 500;// getResources().getDisplayMetrics().widthPixels;
     }
 
-    public void setViewWidthHeight(int width , int height) {
+    public void setViewWidthHeight(int width, int height) {
         screenWidth = width;
         screenHeight = height;
     }
 
     public void setMinHeight(int height) {
         minHeight = height;
-        if(minHeight < touchAreaLength*2) {
-            minHeight = touchAreaLength*2;
+        if (minHeight < touchAreaLength * 2) {
+            minHeight = touchAreaLength * 2;
         }
     }
 
     public void setMinWidth(int width) {
         minWidth = width;
-        if (minWidth < touchAreaLength*3) {
-            minWidth = touchAreaLength*3;
+        if (minWidth < touchAreaLength * 3) {
+            minWidth = touchAreaLength * 3;
         }
     }
 
@@ -103,19 +101,21 @@ public class MoveLayout extends RelativeLayout {
     private int mDeleteHeight = 0;
     private int mDeleteWidth = 0;
     private boolean isInDeleteArea = false;
+
     public void setDeleteWidthHeight(int width, int height) {
         mDeleteWidth = screenWidth - width;
         mDeleteHeight = height;
     }
 
-
+    private long dowmTime;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-              //   Log.d(TAG, "onTouchEvent: down height="+ getHeight());
+                //   Log.d(TAG, "onTouchEvent: down height="+ getHeight());
+
                 oriLeft = getLeft();
                 oriRight = getRight();
                 oriTop = getTop();
@@ -124,16 +124,17 @@ public class MoveLayout extends RelativeLayout {
                 lastY = (int) event.getRawY();
                 lastX = (int) event.getRawX();
                 dragDirection = getDirection((int) event.getX(), (int) event.getY());
+                dowmTime = event.getDownTime();
                 break;
             case MotionEvent.ACTION_UP:
-             //      Log.d(TAG, "onTouchEvent: up");
+                //      Log.d(TAG, "onTouchEvent: up");
                 spotL = false;
                 spotT = false;
                 spotR = false;
                 spotB = false;
                 requestLayout();
 //                mDeleteView.setVisibility(View.INVISIBLE);
-               // invalidate();
+                // invalidate();
                 break;
 //            case MotionEvent.ACTION_CANCEL:
 //                Log.d(TAG, "onTouchEvent: cancel");
@@ -144,31 +145,32 @@ public class MoveLayout extends RelativeLayout {
 //                invalidate();
 //                break;
             case MotionEvent.ACTION_MOVE:
-                 // Log.d(TAG, "onTouchEvent: move");
-                int tempRawX = (int)event.getRawX();
-                int tempRawY = (int)event.getRawY();
+                if (event.getEventTime()-dowmTime>2000) {
+                    // Log.d(TAG, "onTouchEvent: move");
+                    int tempRawX = (int) event.getRawX();
+                    int tempRawY = (int) event.getRawY();
 
-                int dx = tempRawX - lastX;
-                int dy = tempRawY - lastY;
-                lastX = tempRawX;
-                lastY = tempRawY;
+                    int dx = tempRawX - lastX;
+                    int dy = tempRawY - lastY;
+                    lastX = tempRawX;
+                    lastY = tempRawY;
 
-                switch (dragDirection) {
-                    case LEFT:
-                        left( dx);
-                        break;
-                    case RIGHT:
-                        right( dx);
-                        break;
-                    case BOTTOM:
-                        bottom(dy);
-                        break;
-                    case TOP:
-                        top( dy);
-                        break;
-                    case CENTER:
-                        center( dx, dy);
-                        break;
+                    switch (dragDirection) {
+                        case LEFT:
+                            left(dx);
+                            break;
+                        case RIGHT:
+                            right(dx);
+                            break;
+                        case BOTTOM:
+                            bottom(dy);
+                            break;
+                        case TOP:
+                            top(dy);
+                            break;
+                        case CENTER:
+                            center(dx, dy);
+                            break;
 //                    case LEFT_BOTTOM:
 //                        left( dx);
 //                        bottom( dy);
@@ -185,14 +187,15 @@ public class MoveLayout extends RelativeLayout {
 //                        right( dx);
 //                        top( dy);
 //                        break;
-                }
+                    }
 
-                //new pos l t r b is set into oriLeft, oriTop, oriRight, oriBottom
-                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(oriRight - oriLeft, oriBottom - oriTop);
-                lp.setMargins(oriLeft,oriTop,0,0);
-                setLayoutParams(lp);
-             //   Log.d(TAG, "onTouchEvent: set layout width="+(oriRight - oriLeft)+" height="+(oriBottom - oriTop));
-             //   Log.d(TAG, "onTouchEvent: marginLeft="+oriLeft+"  marginTop"+oriTop);
+                    //new pos l t r b is set into oriLeft, oriTop, oriRight, oriBottom
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(oriRight - oriLeft, oriBottom - oriTop);
+                    lp.setMargins(oriLeft, oriTop, 0, 0);
+                    setLayoutParams(lp);
+                    //   Log.d(TAG, "onTouchEvent: set layout width="+(oriRight - oriLeft)+" height="+(oriBottom - oriTop));
+                    //   Log.d(TAG, "onTouchEvent: marginLeft="+oriLeft+"  marginTop"+oriTop);
+                }
                 break;
         }
         return super.onTouchEvent(event);
@@ -211,16 +214,16 @@ public class MoveLayout extends RelativeLayout {
             left = 0;
             right = left + getWidth();
         }
-        if (right > screenWidth ) {
-            right = screenWidth ;
+        if (right > screenWidth) {
+            right = screenWidth;
             left = right - getWidth();
         }
         if (top < 0) {
             top = 0;
             bottom = top + getHeight();
         }
-        if (bottom > screenHeight ) {
-            bottom = screenHeight ;
+        if (bottom > screenHeight) {
+            bottom = screenHeight;
             top = bottom - getHeight();
         }
 
@@ -251,8 +254,8 @@ public class MoveLayout extends RelativeLayout {
         if (oriTop < 0) {
             oriTop = 0;
         }
-        if (oriBottom - oriTop  < minHeight) {
-            oriTop = oriBottom  - minHeight;
+        if (oriBottom - oriTop < minHeight) {
+            oriTop = oriBottom - minHeight;
         }
     }
 
@@ -262,10 +265,10 @@ public class MoveLayout extends RelativeLayout {
     private void bottom(int dy) {
 
         oriBottom += dy;
-        if (oriBottom > screenHeight ) {
-            oriBottom = screenHeight ;
+        if (oriBottom > screenHeight) {
+            oriBottom = screenHeight;
         }
-        if (oriBottom - oriTop  < minHeight) {
+        if (oriBottom - oriTop < minHeight) {
             oriBottom = minHeight + oriTop;
         }
     }
@@ -275,11 +278,11 @@ public class MoveLayout extends RelativeLayout {
      */
     private void right(int dx) {
         oriRight += dx;
-        if (oriRight > screenWidth ) {
-            oriRight = screenWidth ;
+        if (oriRight > screenWidth) {
+            oriRight = screenWidth;
         }
-        if (oriRight - oriLeft  < minWidth) {
-            oriRight = oriLeft  + minWidth;
+        if (oriRight - oriLeft < minWidth) {
+            oriRight = oriLeft + minWidth;
         }
     }
 
@@ -291,12 +294,12 @@ public class MoveLayout extends RelativeLayout {
         if (oriLeft < 0) {
             oriLeft = 0;
         }
-        if (oriRight - oriLeft  < minWidth) {
+        if (oriRight - oriLeft < minWidth) {
             oriLeft = oriRight - minWidth;
         }
     }
 
-    private int getDirection( int x, int y) {
+    private int getDirection(int x, int y) {
         int left = getLeft();
         int right = getRight();
         int bottom = getBottom();
@@ -354,33 +357,32 @@ public class MoveLayout extends RelativeLayout {
         RelativeLayout rlt = (RelativeLayout) getChildAt(0);
         int count = rlt.getChildCount();
 
-        for (int a = 0; a < count; a ++) {
-            if(a == 1) {        //l
-                if(spotL)
+        for (int a = 0; a < count; a++) {
+            if (a == 1) {        //l
+                if (spotL)
                     rlt.getChildAt(a).setVisibility(View.VISIBLE);
                 else
                     rlt.getChildAt(a).setVisibility(View.INVISIBLE);
-            } else if(a == 2) { //t
-                if(spotT)
+            } else if (a == 2) { //t
+                if (spotT)
                     rlt.getChildAt(a).setVisibility(View.VISIBLE);
                 else
                     rlt.getChildAt(a).setVisibility(View.INVISIBLE);
-            } else if(a == 3) { //r
-                if(spotR)
+            } else if (a == 3) { //r
+                if (spotR)
                     rlt.getChildAt(a).setVisibility(View.VISIBLE);
                 else
                     rlt.getChildAt(a).setVisibility(View.INVISIBLE);
-            } else if(a == 4) { //b
-                if(spotB)
+            } else if (a == 4) { //b
+                if (spotB)
                     rlt.getChildAt(a).setVisibility(View.VISIBLE);
                 else
                     rlt.getChildAt(a).setVisibility(View.INVISIBLE);
             }
-           // Log.d(TAG, "onLayout: "+rlt.getChildAt(a).getClass().toString());
+            // Log.d(TAG, "onLayout: "+rlt.getChildAt(a).getClass().toString());
         }
 
     }
-
 
 
     public int getIdentity() {
@@ -399,9 +401,11 @@ public class MoveLayout extends RelativeLayout {
 
     //delete listener
     private DeleteMoveLayout mListener = null;
+
     public interface DeleteMoveLayout {
         void onDeleteMoveLayout(int identity);
     }
+
     public void setOnDeleteMoveLayout(DeleteMoveLayout l) {
         mListener = l;
     }

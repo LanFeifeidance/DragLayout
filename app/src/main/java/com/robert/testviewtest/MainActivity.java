@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
         btn2 = (Button)findViewById(R.id.button2);
         btn3 = (Button)findViewById(R.id.button3);
 
-
         mDragView = (DragView)findViewById(R.id.dragview);
         mDragView.addDragView(R.layout.my_self_view, 0,400,380,760, true, false);
 
